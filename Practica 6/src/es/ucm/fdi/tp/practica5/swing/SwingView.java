@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -70,6 +71,7 @@ public abstract class SwingView extends JFrame implements GameObserver {
 	 * Used to disable or enable panel components whether is a movement or not
 	 */
 	private boolean buttonsDisabled;
+	private Iterator<Color> itColor = Utils.colorsGenerator();
 	
 	/**
 	 * 
@@ -528,7 +530,7 @@ public abstract class SwingView extends JFrame implements GameObserver {
 			}
 			SwingView.this.playerTypes.put(p, PlayerMode.MANUAL);
 			//Put random colors at the start
-			SwingView.this.pieceColors.put(p, Utils.randomColor());
+			SwingView.this.pieceColors.put(p, itColor.next());
 		}
 		//Only the player who has the turn can move a piece, in this case the first player
 		if (localPiece != null && localPiece != pieces.get(0)){

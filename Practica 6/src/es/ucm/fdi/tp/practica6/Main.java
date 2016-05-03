@@ -133,7 +133,34 @@ public class Main {
 			return desc;
 		}
 	}
+	
+	enum ApplicationMode{
+		 NORMAL("normal", "Normal"), CLIENT("client", "Client"), SERVER("server", "Server");
+		 
+		private String id;
+		private String desc;
 
+		ApplicationMode(String id, String desc) {
+			this.id = id;
+			this.desc = desc;
+		}
+
+		public String getId() {
+			return id;
+		}
+
+		public String getDesc() {
+			return desc;
+		}
+
+		@Override
+		public String toString() {
+			return desc;
+		}
+	}
+
+	
+	
 	/**
 	 * Default game to play.
 	 * <p>
@@ -154,6 +181,15 @@ public class Main {
 	 * Modo de juego por defecto.
 	 */
 	final private static PlayerMode DEFAULT_PLAYERMODE = PlayerMode.MANUAL;
+	
+	final private static ApplicationMode DEFAULT_APPLICATIONMODE = ApplicationMode.NORMAL;
+	
+	/**
+	 * Used as string instead of int so that the {@link CommandLine.getOptionValue()} can use it as the 2nd argument
+	 */
+	final private static String DEFAULT_SERVERPORT = "2000";
+	
+	final private static String DEFAULT_SERVERHOST = "localhost";
 
 	/**
 	 * This field includes a game factory that is constructed after parsing the
@@ -251,6 +287,13 @@ public class Main {
 	 */
 	private static AIAlgorithm aiPlayerAlg;
 
+	
+	private static ApplicationMode applicationMode;
+
+	private static int serverPort;
+	
+	private static String serverHost;
+
 	/**
 	 * Processes the command-line arguments and modify the fields of this
 	 * class with corresponding values. E.g., the factory, the pieces, etc.
@@ -282,13 +325,19 @@ public class Main {
 																// --multiviews
 		cmdLineOptions.addOption(constructPlayersOption()); // -p or --players
 		cmdLineOptions.addOption(constructDimensionOption()); // -d or --dim
-
+		cmdLineOptions.addOption(constructApplicationOption()); // -am or --app-mode
+		cmdLineOptions.addOption(constructServerPortOption()); // -sp or --server-port
+		cmdLineOptions.addOption(constructServerHostOption()); // -sh or --server-host
+		
 		// parse the command line as provided in args
 		//
 		CommandLineParser parser = new DefaultParser();
 		try {
 			CommandLine line = parser.parse(cmdLineOptions, args);
 			parseHelpOption(line, cmdLineOptions);
+			parseApplicationOption(line);
+			parseServerPortOption(line);
+			parseServerHostOption(line);
 			parseDimOptionn(line);
 			parseObstaclesOption(line);
 			parseGameOption(line);
@@ -389,6 +438,136 @@ public class Main {
 			throw new ParseException("Uknown view '" + viewVal + "'");
 		}
 	}
+	
+	/**
+	 * Builds the Application (--app-mode or -am) CLI option.
+	 * 
+	 * <p>
+	 * Construye la opcion CLI -am.
+	 * 
+	 * @return CLI {@link Option} for the Application option.
+	 *         <p>
+	 *         Objeto {@link Option} de esta opcion.
+	 */
+	private static Option constructApplicationOption() {
+		String optionInfo = "The application to use ( ";
+		for (ApplicationMode i : ApplicationMode.values()) {
+			optionInfo += i.getId() + " [for " + i.getDesc() + "] ";
+		}
+		optionInfo += "). By defualt, " + DEFAULT_APPLICATIONMODE.getId() + ".";
+		Option opt = new Option("am", "app-mode", true, optionInfo);
+		opt.setArgName("Application identifier");
+		return opt;
+	}
+
+	/**
+	 * Parses the Application option (--app-mode o -am). It sets the value of {@link #Application}
+	 * accordingly.
+	 * 
+	 * <p>
+	 * Extrae la opcion Application (-am) y asigna el valor de {@link #Application}.
+	 * 
+	 * @param line
+	 *            CLI {@link CommandLine} object.
+	 * @throws ParseException
+	 *             If an invalid value is provided (the valid values are those
+	 *             of {@link ApplicationMode}.
+	 */
+	private static void parseApplicationOption(CommandLine line) throws ParseException {
+		String applicationVal = line.getOptionValue("am", DEFAULT_APPLICATIONMODE.getId());
+		for (ApplicationMode am : ApplicationMode.values()) {
+			if (applicationVal.equals(am.getId())) {
+				applicationMode = am;
+			}
+		}
+		if (applicationMode == null) {
+			throw new ParseException("Uknown application mode '" + applicationVal + "'");
+		}
+	}
+	
+	/**
+	 * Builds the server-port (--server-port or -sp) CLI option.
+	 * 
+	 * <p>
+	 * Construye la opcion CLI -sp.
+	 * 
+	 * @return CLI {@link {@link Option} for the server port option.
+	 *         <p>
+	 *         Objeto {@link Option} de esta opcion.
+	 */
+
+	private static Option constructServerPortOption() {
+		return new Option("sp", "server-port", true,
+			"The server port to which the server has to be initialized or the port the server is listening");
+	}
+	
+	/**
+	 * Parses the Server Port option (--server-port or -sp). It sets the value of
+	 * {@link #serverPort} accordingly. 
+	 * 
+	 * <p>
+	 * Extrae la opcion de puerto del servidor (-sp). Asigna el valor del atributo
+	 * {@link #serverPort}.
+	 * 
+	 * @param line
+	 *            CLI {@link CommandLine} object.
+	 * @throws ParseException
+	 *             If an invalid value is provided 
+	 *             <p>
+	 *             Si se proporciona un valor invalido 
+	 */
+	private static void parseServerPortOption(CommandLine line) throws ParseException {
+		String portVal = line.getOptionValue("sp", DEFAULT_SERVERPORT);
+		if (portVal != null) {
+			try {
+				serverPort = Integer.parseInt(portVal);
+			} catch (NumberFormatException e) {
+				throw new ParseException("Invalid port: " + portVal);
+			}
+		}
+	}
+	
+	/**
+	 * Builds the server-port (--server-port or -sp) CLI option.
+	 * 
+	 * <p>
+	 * Construye la opcion CLI -sp.
+	 * 
+	 * @return CLI {@link {@link Option} for the server port option.
+	 *         <p>
+	 *         Objeto {@link Option} de esta opcion.
+	 */
+	
+	private static Option constructServerHostOption() {
+		return new Option("sh", "server-host", true,
+				"The name of the machine that is executing the server");
+	}
+
+	/**
+	 * Parses the Server Port option (--server-port or -sp). It sets the value of
+	 * {@link #serverPort} accordingly. 
+	 * 
+	 * <p>
+	 * Extrae la opcion de puerto del servidor (-sp). Asigna el valor del atributo
+	 * {@link #serverPort}.
+	 * 
+	 * @param line
+	 *            CLI {@link CommandLine} object.
+	 * @throws ParseException
+	 *             If an invalid value is provided 
+	 *             <p>
+	 *             Si se proporciona un valor invalido 
+	 */
+	private static void parseServerHostOption(CommandLine line) throws ParseException {
+		String hostVal = line.getOptionValue("sh", DEFAULT_SERVERHOST);
+		if (hostVal != null) {
+			serverHost = hostVal;
+		}
+	}
+	
+
+	
+	
 
 	/**
 	 * Builds the players (-p or --player) CLI option.
@@ -813,7 +992,29 @@ public class Main {
 	 */
 	public static void main(String[] args) {
 		parseArgs(args);
-		startGame();
+		switch (applicationMode) {
+		case NORMAL:
+			startGame(); break;
+		case CLIENT:
+			startClient(); break;
+		case SERVER:
+			startServer(); break;
+		}
 	}
-
+	
+	private static void startServer() {
+		GameServer c = new GameServer(gameFactory, pieces, serverPort);
+			c.start();
+		}
+	
+	private static void startClient() {
+		try {
+			GameClient c = new GameClient(serverHost, serverPort);
+			gameFactory = c.getGameFactory();
+			gameFactory.createSwingView(c, c, c.getPlayerPiece(), gameFactory.createRandomPlayer(), gameFactory.createAIPlayer(aiPlayerAlg));
+			c.start();
+		} catch (Exception e) {
+			System.err.println(e.getMessage());
+		}
+	}
 }
