@@ -1,4 +1,4 @@
-package es.ucm.fdi.tp.practica6;
+package es.ucm.fdi.tp.practica6.control;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

@@ -1,6 +1,8 @@
-package es.ucm.fdi.tp.practica6;
+package es.ucm.fdi.tp.practica6.control;
 
+import java.io.IOException;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
 
 import es.ucm.fdi.tp.basecode.bgame.control.Controller;
@@ -32,6 +34,7 @@ public class GameClient extends Controller implements Observable<GameObserver>{
 		super(null, null);
 		this.host = host;
 		this.port = port;
+		this.observers = new ArrayList<GameObserver>();
 		connect();
 	}
 	
@@ -44,26 +47,53 @@ public class GameClient extends Controller implements Observable<GameObserver>{
 		throw (Exception) response;
 		}
 		try {
-			gameFactory = getGameFactory();
-			localPiece = getPlayerPiece();
+			gameFactory = (GameFactory) connectionToServer.getObject();
+			localPiece = (Piece) connectionToServer.getObject();
 			
 		} catch (Exception e) {
 			throw new GameError("Unknown server response: "+e.getMessage());
 		}
 	}
 	//A quien consulto estos valores
-	public GameFactory getGameFactory() { … }
-	public Piece getPlayerPiece() { … }
+	public GameFactory getGameFactory() { return gameFactory; }
+	public Piece getPlayerPiece() { return localPiece; }
 	public void addObserver(GameObserver o) { observers.add(o); }
 	public void removeObserver(GameObserver o) { observers.remove(o); }
 	
 	public void start() {
 		//Como hacer esto
-		this.observers.add(new GameClient(host, port));
+		this.observers.add( new GameObserver() {
+			
+			@Override
+			public void onMoveStart(Board board, Piece turn) {
+			}
+			
+			@Override
+			public void onMoveEnd(Board board, Piece turn, boolean success) {
+			}
+			
+			@Override
+			public void onGameStart(Board board, String gameDesc, List<Piece> pieces,
+					Piece turn) {
+			}
+			
+			@Override
+			public void onGameOver(Board board, State state, Piece winner) {
+				gameOver = true;
+			}
+			
+			@Override
+			public void onError(String msg) {
+			}
+			
+			@Override
+			public void onChangeTurn(Board board, Piece turn) {
+			}
+		});
 		gameOver = false;
 		while (!gameOver) {
 				try {
-				Response res = … // read a response
+				Response res = (Response) connectionToServer.getObject(); // read a response
 				for (GameObserver o : observers) {
 					// execute the response on the observer o
 					res.run(o);
@@ -90,7 +120,11 @@ public class GameClient extends Controller implements Observable<GameObserver>{
 	//Como hacer esto
 	private void forwardCommand(Command cmd) {
 		if (!gameOver){
-			cmd.execute(c);
+			try {
+				connectionToServer.sendObject(cmd);
+			} catch (IOException e) {
+
+			}
 		}
 		// if the game is over do nothing, otherwise
 		// send the object cmd to the server

@@ -1,5 +1,6 @@
-package es.ucm.fdi.tp.practica6;
+package es.ucm.fdi.tp.practica6.control;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -7,10 +8,14 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
 import es.ucm.fdi.tp.basecode.bgame.control.Controller;
@@ -33,7 +38,6 @@ import es.ucm.fdi.tp.basecode.bgame.model.Piece;
 
 public class GameServer extends Controller implements GameObserver{
 	
-	//TODO AÑADIR COSAS
 	private int port;
 	private int numPlayers;
 	private int numOfConnectedPlayers;
@@ -42,17 +46,17 @@ public class GameServer extends Controller implements GameObserver{
 	volatile private ServerSocket server;
 	volatile private boolean stopped;
 	volatile private boolean gameOver;
-	private String infoArea;
+	private JTextArea infoArea;
 	
 	public GameServer(GameFactory gameFactory, List<Piece> pieces, int port) {
 		super(new Game(gameFactory.gameRules()), pieces);
 		this.port = port;
 		this.gameFactory = gameFactory;
-		this.numPlayers = 0;
+		this.numPlayers = pieces.size();
+		this.clients = new ArrayList<Connection>();
 		this.numOfConnectedPlayers = 0;
-		//TODO initialise the fields with corresponding values
 		game.addObserver(this);
-		}
+	}
 	
 	@Override
 	public synchronized void makeMove(Player player) {
@@ -77,8 +81,6 @@ public class GameServer extends Controller implements GameObserver{
 		try {
 			server = new ServerSocket(port);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 		stopped = false;
 		while (!stopped) {
@@ -95,8 +97,6 @@ public class GameServer extends Controller implements GameObserver{
 				}
 			}
 		}
-		//TODO TENGO QUE PARAR EL SERVIDOR O NO?
-		//server.close();
 	}
 	
 	private void handleRequest(Socket s) {
@@ -108,16 +108,25 @@ public class GameServer extends Controller implements GameObserver{
 				c.stop();
 				return;
 			}
-			if (numOfConnectedPlayers >= MAXIMO){
+			if (numOfConnectedPlayers >= numPlayers){
 				throw new GameError("Max number of players reached");
 			}
-			//TODO
+			
 			numOfConnectedPlayers++;
 			clients.add(c);
-			// 3. …
-			//TODO
-			// 4. …
-			//TODO
+			
+			c.sendObject("OK");
+			c.sendObject(gameFactory);
+			c.sendObject(pieces.get(numOfConnectedPlayers - 1));
+			
+			if (numOfConnectedPlayers == numPlayers){
+				if (game.getState().equals(State.Starting)){
+					game.start(pieces);
+				}
+				else {
+					game.restart();
+				}
+			}
 			startClientListener(c);
 		} catch (IOException | ClassNotFoundException _e) { }
 	}
@@ -129,9 +138,7 @@ public class GameServer extends Controller implements GameObserver{
 			public void run() {
 				while (!stopped && !gameOver) {
 					try {
-						//How to read a command
-						Command cmd = null;
-						
+						Command cmd =(Command) c.getObject();
 						// 1. read a Command
 						cmd.execute(GameServer.this);
 						// 2. execute the command
@@ -145,7 +152,6 @@ public class GameServer extends Controller implements GameObserver{
 				
 			}
 		});
-		//TODO
 		t.start();
 		//TODO
 	}
@@ -163,53 +169,66 @@ public class GameServer extends Controller implements GameObserver{
 	
 	private void constructGUI() {
 		JFrame window = new JFrame("Game Server");
-		//TODO
+		JPanel mainPanel = new JPanel( new BorderLayout() );
+		window.setContentPane(mainPanel);
 		// create text area for printing messages
-		//Mirar si es un string o un JTextArea
-		infoArea = "";
-		//TODO
+		infoArea = new JTextArea();
+		infoArea.setEditable(false);
+		mainPanel.add(infoArea, BorderLayout.CENTER);
 		// quit button
-		JButton quitButton = new JButton("Stop Server");
+		JButton quitButton = new JButton("Stop Server and Quit");
 		quitButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				stopServer();
+				stopAndQuit();
 			}
 		});
-		//TODO
-		window.add(quitButton);
+		
+		mainPanel.add(quitButton, BorderLayout.PAGE_END);
 		//Mirar la dimension
 		window.setPreferredSize(new Dimension(200, 200));
 		window.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		window.pack();
 		window.setVisible(true);
 	}
+	
+	/**
+	 * Stops the server and finishes the game when the confirmation window is accepted
+	 */
+	private void stopAndQuit() {
+		int n = JOptionPane.showOptionDialog(new JFrame(), "Are sure you want to quit?", "Quit",
+				JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+		if (n == 0) {
+			stopServer();
+			//finalize your app
+			System.exit(0);
+		}
+	}
+	
+	
 	/**
 	 * Stops the server, marking stopped to true, stopping the game and turning off the server
 	 */
 	private void stopServer() {
-		// TODO Auto-generated method stub
 		this.stopped = true;
 		stopGame();
 		try {
 			server.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 	}
 	/**
 	 * Stop the game, marking gameOver to true and stopping each connection of the players
 	 */
 	private void stopGame() {
-		stop();
+		if (game.getState().equals(State.InPlay)){
+			stop();
+		}
 		gameOver = true;
 		for (Connection c : clients){
 			try {
 				c.stop();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
 		}
 	}
@@ -219,7 +238,7 @@ public class GameServer extends Controller implements GameObserver{
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				infoArea += msg;
+				infoArea.append(msg);
 			}
 		});
 	}
@@ -233,6 +252,7 @@ public class GameServer extends Controller implements GameObserver{
 	public void onGameOver(Board board, State state, Piece winner) {
 		forwardNotification(new GameOverResponse(board, state, winner));
 		//Stop the game
+		stopGame();
 	}
 
 	@Override
@@ -260,11 +280,8 @@ public class GameServer extends Controller implements GameObserver{
 			try {
 				c.sendObject(r);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
 		}
-		// call c.sendObject(r) for each client connection ‘c’
 	}
 
 }

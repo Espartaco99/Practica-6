@@ -129,7 +129,7 @@ public abstract class SwingView extends JFrame implements GameObserver {
 			}
 			else if (columnIndex == 1){
 				//Shows only the mode to the correct view
-				if (localPiece == null || localPiece == pieces.get(rowIndex)){
+				if (localPiece.equals(null) || localPiece.equals(pieces.get(rowIndex))){
 					return playerTypes.get(pieces.get(rowIndex));					
 				}
 				else{
@@ -190,7 +190,7 @@ public abstract class SwingView extends JFrame implements GameObserver {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					//If the mode is not manual or is a movement or the player is not in his turn, the button does nothing
-					if ((localPiece == null || localPiece == turn) && playerTypes.get(turn) == PlayerMode.MANUAL && !buttonsDisabled){
+					if ((localPiece.equals(null) || localPiece.equals(turn) && playerTypes.get(turn).equals(PlayerMode.MANUAL) && !buttonsDisabled)){
 						ctrl.makeMove(randPlayer);
 					}
 				}
@@ -204,7 +204,7 @@ public abstract class SwingView extends JFrame implements GameObserver {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					//If the mode is not manual or is a movement or the player is not in his turn, the button does nothing
-					if ((localPiece == null || localPiece == turn) && playerTypes.get(turn) == PlayerMode.MANUAL && !buttonsDisabled){
+					if ((localPiece.equals(null) || localPiece.equals(turn)) && playerTypes.get(turn).equals(PlayerMode.MANUAL) && !buttonsDisabled){
 						ctrl.makeMove(aiPlayer);					
 					}
 				}
@@ -260,10 +260,10 @@ public abstract class SwingView extends JFrame implements GameObserver {
 		
 		JComboBox<nameModes> listModes = new JComboBox<>();
 		listModes.addItem(nameModes.MANUAL);
-		if (randPlayer != null){
+		if (!randPlayer.equals(null)){
 			listModes.addItem(nameModes.RANDOM);
 		}
-		if (aiPlayer != null){
+		if (!aiPlayer.equals(null)){
 			listModes.addItem(nameModes.INTELLIGENT);
 		}
 		optionsPanel.add(listModes);
@@ -381,7 +381,7 @@ public abstract class SwingView extends JFrame implements GameObserver {
 		this.addWindowListener(new WindowListener() {
 			public void windowClosing(WindowEvent e) { 
 				
-				if (playerTypes.get(turn) == PlayerMode.MANUAL){
+				if (playerTypes.get(turn).equals(PlayerMode.MANUAL)){
 					quit(); 
 				}
 			}
@@ -413,14 +413,14 @@ public abstract class SwingView extends JFrame implements GameObserver {
 				
 		p.add(quit);
 		//Restart button is only allowed in single view, not in multiviews
-		if (localPiece == null){
+		if (localPiece.equals(null)){
 			JButton restart = new JButton("Restart");
 			restart.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					//If the turn is manual and the button is not disabled or if the game is over 
 					//(turn = null in OnGameOver) we can restart
-					if ((playerTypes.get(turn) == PlayerMode.MANUAL && !buttonsDisabled) || turn == null){
+					if ((playerTypes.get(turn).equals(PlayerMode.MANUAL) && !buttonsDisabled) || turn.equals(null)){
 						activateBoard();
 						addMsg("Restarting the game\n");
 						ctrl.restart();
@@ -523,9 +523,9 @@ public abstract class SwingView extends JFrame implements GameObserver {
 		//HashMap used for playerTypes		
 		listPieces1.removeAllItems();
 		listPieces2.removeAllItems();
-		for( Piece p : pieces ) {
+		for(Piece p : pieces) {
 			listPieces2.addItem(p);
-			if (localPiece == null || p == localPiece){
+			if (localPiece.equals(null) || p.equals(localPiece)){
 					listPieces1.addItem(p);				
 			}
 			SwingView.this.playerTypes.put(p, PlayerMode.MANUAL);
@@ -533,19 +533,19 @@ public abstract class SwingView extends JFrame implements GameObserver {
 			SwingView.this.pieceColors.put(p, itColor.next());
 		}
 		//Only the player who has the turn can move a piece, in this case the first player
-		if (localPiece != null && localPiece != pieces.get(0)){
+		if (localPiece != null && !localPiece.equals(pieces.get(0))){
 			deActivateBoard();
 		}
 		listPieces1.setSelectedIndex(0);
 		listPieces2.setSelectedIndex(0);
 		storyArea.setText("");
 		String story = "Turn for ";
-		if (pieces.get(0) == localPiece){
+		if (pieces.get(0).equals(localPiece)){
 			story += "You! ";
 		}
 		story += pieces.get(0).toString() + "\n";
 		storyArea.append(story);
-		if (localPiece == null){
+		if (localPiece.equals(null)){
 			SwingView.super.setTitle("Board Games: " + gameDesc);
 		}
 		else{
@@ -574,8 +574,8 @@ public abstract class SwingView extends JFrame implements GameObserver {
 		storyArea.append("Game Over!!\n");
 		storyArea.append("Game Status: " + state + "\n");
 		//Shows the winner in the view
-		if (localPiece == null){
-			if (winner != null)
+		if (localPiece.equals(null)){
+			if (!winner.equals(null))
 				storyArea.append(winner + " have won, congratulations!\n");
 			else {
 				storyArea.append("You have draw, try it again!\n");
@@ -583,11 +583,11 @@ public abstract class SwingView extends JFrame implements GameObserver {
 		}
 		//In case of multiviews, shows different messages
 		else {
-			if (state == State.Draw){
+			if (state.equals(State.Draw)){
 				storyArea.append("You have draw, try it again!\n");
 			}
 			//If someone has won and the piece is part of the player, show him the victory message
-			else if (state == State.Won && localPiece == winner){
+			else if (state.equals(State.Won) && localPiece.equals(winner)){
 				storyArea.append("(You!) " + winner +  " have won, congratulations!\n");
 			}
 			else {
@@ -640,7 +640,7 @@ public abstract class SwingView extends JFrame implements GameObserver {
 	
 	private void handleOnChangeTurn() {
 		String story = "Turn for ";
-		if (turn == localPiece || localPiece == null){
+		if (turn.equals(localPiece) || localPiece.equals(null)){
 			story += "You! ";
 			activateBoard();
 		}
@@ -659,7 +659,7 @@ public abstract class SwingView extends JFrame implements GameObserver {
 	}
 	
 	private void handleOnError(String msg) {
-		if (turn == localPiece || localPiece == null){
+		if (turn.equals(localPiece) || localPiece.equals(null)){
 			JFrame frame = new JFrame();
 			JOptionPane.showMessageDialog(frame, msg, "ERROR", JOptionPane.ERROR_MESSAGE);
 			addMsg(turn + " ");

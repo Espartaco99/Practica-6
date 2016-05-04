@@ -12,7 +12,6 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
-
 import es.ucm.fdi.tp.basecode.bgame.control.ConsoleCtrl;
 import es.ucm.fdi.tp.basecode.bgame.control.ConsoleCtrlMVC;
 import es.ucm.fdi.tp.basecode.bgame.control.Controller;
@@ -26,6 +25,8 @@ import es.ucm.fdi.tp.practica5.ataxx.AtaxxFactoryExt;
 import es.ucm.fdi.tp.practica5.attt.AdvancedTTTFactoryExt;
 import es.ucm.fdi.tp.practica5.connectn.ConnectNFactoryExt;
 import es.ucm.fdi.tp.practica5.ttt.TicTacToeFactoryExt;
+import es.ucm.fdi.tp.practica6.control.GameClient;
+import es.ucm.fdi.tp.practica6.control.GameServer;
 
 /**
  * This is the class with the main method for the board games application.
@@ -1011,6 +1012,7 @@ public class Main {
 		try {
 			GameClient c = new GameClient(serverHost, serverPort);
 			gameFactory = c.getGameFactory();
+			System.out.println(c.getPlayerPiece());
 			gameFactory.createSwingView(c, c, c.getPlayerPiece(), gameFactory.createRandomPlayer(), gameFactory.createAIPlayer(aiPlayerAlg));
 			c.start();
 		} catch (Exception e) {
