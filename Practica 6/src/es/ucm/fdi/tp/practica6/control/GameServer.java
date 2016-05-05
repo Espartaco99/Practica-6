@@ -231,7 +231,9 @@ public class GameServer extends Controller implements GameObserver{
 			} catch (IOException e) {
 			}
 		}
-	}
+		//The game has ended, so there arent any connected players
+		numOfConnectedPlayers = 0;	
+		}
 
 	private void log(String msg) {
 		// show the message in infoArea, use invokeLater!!
@@ -252,6 +254,7 @@ public class GameServer extends Controller implements GameObserver{
 	public void onGameOver(Board board, State state, Piece winner) {
 		forwardNotification(new GameOverResponse(board, state, winner));
 		//Stop the game
+		
 		stopGame();
 	}
 

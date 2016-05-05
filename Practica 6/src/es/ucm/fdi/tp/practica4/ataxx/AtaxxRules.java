@@ -230,7 +230,7 @@ public class AtaxxRules implements GameRules {
 				for (int col = 0; col < dim && !hasMoves; col++){
 					p = board.getPosition(row, col);
 					//Looking for the moves the nextPlayer has, if there aren`t posible moves, the player next has the turn 
-					if (p == playersPieces.get(nextPlayer)){
+					if (p.equals(playersPieces.get(nextPlayer))){
 						List<GameMove> moves = adyacentMoves(board, p, new ArrayList<GameMove>(), row, col);
 						if (!moves.isEmpty()){
 							hasMoves = true;
@@ -255,7 +255,7 @@ public class AtaxxRules implements GameRules {
 		for (int i = 0; i < board.getRows(); i++){
 			for (int j = 0; j < board.getCols(); j++){
 				//Si la pieza que pasamos está en esa posicion, miramos todos los casos
-				if (board.getPosition(i, j) == turn){
+				if (board.getPosition(i, j).equals(turn)){
 					moves = adyacentMoves(board, turn, moves, i, j);
 				}
 			}

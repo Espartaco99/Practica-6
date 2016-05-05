@@ -89,7 +89,7 @@ public class AtaxxMove extends GameMove {
 	public void execute(Board board, List<Piece> pieces) {
 		Piece p = board.getPosition(rowOrigin, colOrigin);
 		//La pieza que mueves tiene que ser una de tu turno
-		if (getPiece() == p){
+		if (getPiece().equals(p)){
 			if (p != null && !pieces.equals(p)){
 				if (rowDest >= 0 && rowDest < board.getRows() && colDest >= 0 && colDest < board.getCols() 
 						&& board.getPosition(rowDest, colDest) == null){
@@ -136,7 +136,7 @@ public class AtaxxMove extends GameMove {
 					p = board.getPosition(rowAux, colAux);
 					//If the piece in the square is diferent from the one is playing, not null and is on the list of players
 					//this piece is captured and changed to be one of the player pieces
-					if (getPiece() != p && p != null && pieces.indexOf(p) != -1){
+					if (!getPiece().equals(p) && p != null && pieces.indexOf(p) != -1){
 						board.setPosition(rowAux, colAux, getPiece());
 					}
 				}

@@ -21,10 +21,10 @@ import es.ucm.fdi.tp.basecode.bgame.model.AIAlgorithm;
 import es.ucm.fdi.tp.basecode.bgame.model.Game;
 import es.ucm.fdi.tp.basecode.bgame.model.GameError;
 import es.ucm.fdi.tp.basecode.bgame.model.Piece;
-import es.ucm.fdi.tp.practica5.ataxx.AtaxxFactoryExt;
-import es.ucm.fdi.tp.practica5.attt.AdvancedTTTFactoryExt;
-import es.ucm.fdi.tp.practica5.connectn.ConnectNFactoryExt;
-import es.ucm.fdi.tp.practica5.ttt.TicTacToeFactoryExt;
+import es.ucm.fdi.tp.practica6.ataxx.AtaxxFactoryExt;
+import es.ucm.fdi.tp.practica6.attt.AdvancedTTTFactoryExt;
+import es.ucm.fdi.tp.practica6.connectn.ConnectNFactoryExt;
+import es.ucm.fdi.tp.practica6.ttt.TicTacToeFactoryExt;
 import es.ucm.fdi.tp.practica6.control.GameClient;
 import es.ucm.fdi.tp.practica6.control.GameServer;
 
