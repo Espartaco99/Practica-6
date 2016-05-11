@@ -287,7 +287,23 @@ public class AtaxxRules implements GameRules {
 
 	@Override
 	public double evaluate(Board board, List<Piece> pieces, Piece turn, Piece p) {
-		return 0;
+		int[] numPieces = countPieces(board, pieces);
+		double m = 0; 
+		int aux = pieces.indexOf(p);
+		for (int i = 0; i < pieces.size(); i++){
+			if (i != aux){
+				m += numPieces[i];		
+			}
+		}
+		double n = numPieces[aux];
+		//...
+		// 1. ’n’ contiene el numero de fichas de
+		// tipo ’p’ en el tablero ’board’
+		// 1. ’m’ contiene el numero de fichas de
+		// tipo distinto de ’p’ en el tablero ’board’
+		// (sin contar los obstaculos)
+		double total = n+m;
+		return (n / total) - (m / total);
 	}
 	
 	

@@ -159,6 +159,38 @@ public class Main {
 			return desc;
 		}
 	}
+	
+	/**
+	 * Algorithms for automatic players. The 'none' option means that the
+	 * default behavior is used (i.e., a player that waits for some time and
+	 * then generates a random move)
+	 * 
+	 */
+	private enum AlgorithmForAIPlayer {
+		NONE("none", "No AI Algorithm"), MINMAX("minmax", "MinMax"), MINMAXAB("minmaxab",
+				"MinMax with Alhpa-Beta Prunning");
+
+		private String id;
+		private String desc;
+
+		AlgorithmForAIPlayer(String id, String desc) {
+			this.id = id;
+			this.desc = desc;
+		}
+
+		public String getId() {
+			return id;
+		}
+
+		public String getDesc() {
+			return desc;
+		}
+
+		@Override
+		public String toString() {
+			return desc;
+		}
+	}
 
 	
 	
@@ -191,6 +223,11 @@ public class Main {
 	final private static String DEFAULT_SERVERPORT = "2000";
 	
 	final private static String DEFAULT_SERVERHOST = "localhost";
+	
+	/**
+	 * Default algorithm for automatic player.
+	 */
+	final private static AlgorithmForAIPlayer DEFAULT_AIALG = AlgorithmForAIPlayer.NONE;
 
 	/**
 	 * This field includes a game factory that is constructed after parsing the
@@ -294,6 +331,16 @@ public class Main {
 	private static int serverPort;
 	
 	private static String serverHost;
+	
+	private static String algorithm;
+	
+	/**
+	 * The depth of the maximum depth in the MinMax Algorithm.
+	 * 
+	 * <p>
+	 * La profundidad máxima del árbol MinMax
+	 */
+	private static Integer minmaxTreeDepth;
 
 	/**
 	 * Processes the command-line arguments and modify the fields of this
@@ -528,6 +575,7 @@ public class Main {
 		}
 	}
 	
+	
 	/**
 	 * Builds the server-port (--server-port or -sp) CLI option.
 	 * 
@@ -566,8 +614,74 @@ public class Main {
 		}
 	}
 	
+	/**
+	 * Builds the MinMax tree depth (-md or --minmax-depth) CLI option.
+	 * 
+	 * @return CLI {@link {@link Option} for the MinMax tree depth option.
+	 */
+	private static Option constructMinMaxDepathOption() {
+		Option opt = new Option("md", "minmax-depth", true, "The maximum depth of the MinMax tree");
+		opt.setArgName("number");
+		return opt;
+	}
 
-	
+	/**
+	 * Parses the MinMax tree depth option (-md or --minmax-depth). It sets the
+	 * value of {@link #minmaxTreeDepth} accordingly.
+	 * 
+	 * 
+	 * @param line
+	 *            CLI {@link CommandLine} object.
+	 */
+	private static void parseMixMaxDepthOption(CommandLine line) throws ParseException {
+		String depthVal = line.getOptionValue("md");
+		minmaxTreeDepth = null;
+
+		if (depthVal != null) {
+			try {
+				minmaxTreeDepth = Integer.parseInt(depthVal);
+			} catch (NumberFormatException e) {
+				throw new ParseException("Invalid value for the MinMax depth '" + depthVal + "'");
+			}
+		}
+	}
+
+	/**
+	 * Builds the ai-algorithm (-aialg or --ai-algorithm) CLI option.
+	 * 
+	 * @return CLI {@link {@link Option} for the ai-algorithm option.
+	 */
+	private static Option constructAIAlgOption() {
+		String optionInfo = "The AI algorithm to use ( ";
+		for (AlgorithmForAIPlayer alg : AlgorithmForAIPlayer.values()) {
+			optionInfo += alg.getId() + " [for " + alg.getDesc() + "] ";
+		}
+		optionInfo += "). By defualt, no algorithm is used.";
+		Option opt = new Option("aialg", "ai-algorithm", true, optionInfo);
+		opt.setArgName("algorithm for ai player");
+		return opt;
+	}
+
+	/**
+	 * Parses the ai-algorithm option (-aialg or --ai-algorithm). It sets the
+	 * value of {@link #minmaxTreeDepth} accordingly.
+	 * 
+	 * 
+	 * @param line
+	 *            CLI {@link CommandLine} object.
+	 */
+	private static void parseAIAlgOption(CommandLine line) throws ParseException {
+		String aialg = line.getOptionValue("aialg", DEFAULT_AIALG.getId());
+
+		AlgorithmForAIPlayer selectedAlg = null;
+		for (AlgorithmForAIPlayer a : AlgorithmForAIPlayer.values()) {
+			if (a.getId().equals(aialg)) {
+				selectedAlg = a;
+				break;
+			}	
+		}
+	}
+		
 	
 
 	/**

@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -25,6 +26,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.swing.border.Border;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
@@ -77,6 +79,7 @@ public abstract class SwingView extends JFrame implements GameObserver {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	protected static final long TIMEOUT = 5000;
 	
 	public SwingView(){
 		
@@ -89,7 +92,7 @@ public abstract class SwingView extends JFrame implements GameObserver {
 		this.playerTypes = new HashMap<>();
 		this.pieceColors = new HashMap<>();
 		this.randPlayer = randPlayer;
-		this.aiPlayer = aiPlayer;
+		this.aiPlayer = aiPlayer == null ? null : new TimeOutPlayer(aiPlayer, TIMEOUT);
 		initGUI();
 		g.addObserver(this);
 	}
@@ -179,11 +182,28 @@ public abstract class SwingView extends JFrame implements GameObserver {
 	}
 	
 	/**
+	 * Used to call ctrl.makeMove(player) with a swingWorker to avoid interruption on the main thread
+	 * @param player The player you want to make the move
+	 */
+	private void makeMove(Player player){
+		SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+			@Override
+			protected Void doInBackground() throws Exception {
+				ctrl.makeMove(player);
+				return null;
+			}
+			
+		};
+		worker.execute();
+	}
+	
+	/**
 	 * Add the random and intelligent button into ctrlPanel
 	 */
 	private void addAutomaticMoves() {
 		JPanel movesPanel = new JPanel();
 		//Random Button
+		
 		if (randPlayer != null){
 			JButton random = new JButton("Random");
 			random.addActionListener(new ActionListener() {
@@ -191,7 +211,7 @@ public abstract class SwingView extends JFrame implements GameObserver {
 				public void actionPerformed(ActionEvent e) {
 					//If the mode is not manual or is a movement or the player is not in his turn, the button does nothing
 					if (turn != null && (localPiece == null || localPiece.equals(turn) && playerTypes.get(turn).equals(PlayerMode.MANUAL) && !buttonsDisabled)){
-						ctrl.makeMove(randPlayer);
+						makeMove(randPlayer);
 					}
 				}
 			});
@@ -205,7 +225,8 @@ public abstract class SwingView extends JFrame implements GameObserver {
 				public void actionPerformed(ActionEvent e) {
 					//If the mode is not manual or is a movement or the player is not in his turn, the button does nothing
 					if (turn != null && (localPiece == null || localPiece.equals(turn)) && playerTypes.get(turn).equals(PlayerMode.MANUAL) && !buttonsDisabled){
-						ctrl.makeMove(aiPlayer);					
+						
+						makeMove(aiPlayer);
 					}
 				}
 			});
@@ -448,7 +469,7 @@ public abstract class SwingView extends JFrame implements GameObserver {
 	final protected void decideMakeManualMove(Player manualPlayer) { 
 		//If the move is null it throws an exception, we just catch it and do nothing casue there isnt a move 
 		try{
-			ctrl.makeMove(manualPlayer);			
+			makeMove(manualPlayer);			
 		}
 		catch (Exception e){
 		}
@@ -466,7 +487,7 @@ public abstract class SwingView extends JFrame implements GameObserver {
 				buttonsDisabled = true;
 				//If the move is null it throws an exception, we just catch it and do nothing casue there isnt a move 
 				try{			
-					ctrl.makeMove(randPlayer);
+					makeMove(randPlayer);
 				}
 				catch (Exception e){
 				}
@@ -477,7 +498,7 @@ public abstract class SwingView extends JFrame implements GameObserver {
 				buttonsDisabled = true;
 				//If the move is null it throws an exception, we just catch it and do nothing casue there isnt a move 
 				try{			
-					ctrl.makeMove(aiPlayer);
+					makeMove(aiPlayer);
 
 				}
 				catch (Exception e){
@@ -665,6 +686,8 @@ public abstract class SwingView extends JFrame implements GameObserver {
 			JOptionPane.showMessageDialog(frame, msg, "ERROR", JOptionPane.ERROR_MESSAGE);
 			addMsg(turn + " ");
 			activateBoard();
+			//If an error happens, the mode of the player is returned to manual
+			playerTypes.put(turn, PlayerMode.MANUAL);
 		}					
 	}
 
