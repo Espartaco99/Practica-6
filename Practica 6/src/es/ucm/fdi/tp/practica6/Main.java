@@ -21,6 +21,7 @@ import es.ucm.fdi.tp.basecode.bgame.model.AIAlgorithm;
 import es.ucm.fdi.tp.basecode.bgame.model.Game;
 import es.ucm.fdi.tp.basecode.bgame.model.GameError;
 import es.ucm.fdi.tp.basecode.bgame.model.Piece;
+import es.ucm.fdi.tp.basecode.minmax.MinMax;
 import es.ucm.fdi.tp.practica6.ataxx.AtaxxFactoryExt;
 import es.ucm.fdi.tp.practica6.attt.AdvancedTTTFactoryExt;
 import es.ucm.fdi.tp.practica6.connectn.ConnectNFactoryExt;
@@ -332,7 +333,7 @@ public class Main {
 	
 	private static String serverHost;
 	
-	private static String algorithm;
+
 	
 	/**
 	 * The depth of the maximum depth in the MinMax Algorithm.
@@ -369,13 +370,15 @@ public class Main {
 		cmdLineOptions.addOption(constructGameOption()); // -g or --game
 		cmdLineOptions.addOption(constructObstaclesOption()); // -o or --obstacles
 		cmdLineOptions.addOption(constructViewOption()); // -v or --view
-		cmdLineOptions.addOption(constructMlutiViewOption()); // -m or
+		cmdLineOptions.addOption(constructMutiViewOption()); // -m or
 																// --multiviews
 		cmdLineOptions.addOption(constructPlayersOption()); // -p or --players
 		cmdLineOptions.addOption(constructDimensionOption()); // -d or --dim
 		cmdLineOptions.addOption(constructApplicationOption()); // -am or --app-mode
 		cmdLineOptions.addOption(constructServerPortOption()); // -sp or --server-port
 		cmdLineOptions.addOption(constructServerHostOption()); // -sh or --server-host
+		cmdLineOptions.addOption(constructMinMaxDepathOption()); // --minmax-depth or -md
+		cmdLineOptions.addOption(constructAIAlgOption()); // --ai-algorithm or -aialg
 		
 		// parse the command line as provided in args
 		//
@@ -392,6 +395,8 @@ public class Main {
 			parseViewOption(line);
 			parseMultiViewOption(line);
 			parsePlayersOptions(line);
+			parseMixMaxDepthOption(line);
+			parseAIAlgOption(line);
 
 			// if there are some remaining arguments, then something wrong is
 			// provided in the command line!
@@ -421,7 +426,7 @@ public class Main {
 	 * @return CLI {@link {@link Option} for the multiview option.
 	 */
 
-	private static Option constructMlutiViewOption() {
+	private static Option constructMutiViewOption() {
 		return new Option("m", "multiviews", false,
 				"Create a separate view for each player (valid only when using the " + ViewInfo.WINDOW + " view)");
 	}
@@ -680,6 +685,23 @@ public class Main {
 				break;
 			}	
 		}
+
+		if (selectedAlg == null) {
+			throw new ParseException("Uknown AI algorithms '" + aialg + "'");
+		}
+
+		switch (selectedAlg) {
+		case MINMAX:
+			aiPlayerAlg = minmaxTreeDepth == null ? new MinMax(false) : new MinMax(minmaxTreeDepth, false);
+			break;
+		case MINMAXAB:
+			aiPlayerAlg = minmaxTreeDepth == null ? new MinMax() : new MinMax(minmaxTreeDepth);
+			break;
+		case NONE:
+			aiPlayerAlg = null;
+			break;
+		}
+		
 	}
 		
 	
