@@ -13,11 +13,6 @@ import es.ucm.fdi.tp.basecode.bgame.model.Piece;
 
 public class MinMax implements AIAlgorithm {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-
 	final private static int _TREE_DEPTH = 5;
 
 	private boolean useAblphaBeta;
