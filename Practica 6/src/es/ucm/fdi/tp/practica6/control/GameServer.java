@@ -96,6 +96,10 @@ public class GameServer extends Controller implements GameObserver{
 					log("error while waiting for a connection: " + e.getMessage());
 				}
 			}
+			//Caso de que haya 2 servidores escuchando en el mismo puerto, se cierra el servidor
+			catch (NullPointerException e){
+				System.exit(0);
+			}
 		}
 	}
 	
@@ -153,7 +157,6 @@ public class GameServer extends Controller implements GameObserver{
 			}
 		});
 		t.start();
-		//TODO
 	}
 	
 	private void controlGUI() {

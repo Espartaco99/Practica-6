@@ -81,7 +81,7 @@ public class Main {
 	 * Juegos disponibles.
 	 */
 	enum GameInfo {
-		CONNECTN("cn", "ConnectN"), TicTacToe("ttt", "Tic-Tac-Toe"), AdvancedTicTacToe("attt", "Advanced Tic-Tac-Toe"), Ataxx("at", "Ataxx");
+		CONNECTN("cn", "ConnectN"), TicTacToe("ttt", "Tic-Tac-Toe"), AdvancedTicTacToe("attt", "Advanced Tic-Tac-Toe"), Ataxx("ataxx", "Ataxx");
 
 		private String id;
 		private String desc;
@@ -200,7 +200,7 @@ public class Main {
 	 * <p>
 	 * Juego por defecto.
 	 */
-	final private static GameInfo DEFAULT_GAME = GameInfo.AdvancedTicTacToe;
+	final private static GameInfo DEFAULT_GAME = GameInfo.CONNECTN;
 
 	/**
 	 * default view to use.

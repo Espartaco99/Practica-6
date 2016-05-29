@@ -39,30 +39,26 @@ public abstract class BoardComponent extends JComponent {
 		addMouseListener(new MouseListener() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				System.out.println("Mouse Released");
+				
 			}
 
 			@Override
 			public void mousePressed(MouseEvent e) {
-				System.out.println("Mouse Pressed");
+				
 			}
 
 			@Override
 			public void mouseExited(MouseEvent e) {
-				System.out.println("Mouse Exited Component");
+				
 			}
 
 			@Override
 			public void mouseEntered(MouseEvent e) {
-				System.out.println("Mouse Entered Component");
+			
 			}
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				//Debug messages
-				System.out.println("Button" + e.getButton() + " Clicked at"
-						+ "(" + e.getX() + "," + e.getY() + ")");
-				System.out.println(e.getY()/  _CELL_HEIGHT + " " + e.getX() /  _CELL_WIDTH);
 				//The important call of the function
 				BoardComponent.this.mouseClicked(e.getY() / _CELL_HEIGHT, e.getX() / _CELL_WIDTH, e.getButton());
 			}
